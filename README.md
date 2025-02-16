@@ -57,7 +57,7 @@ CREATE TABLE grocery_list (
 
 ## Technologies Used
 
-- **Frontend**: React.js
+- **Frontend**: React.js, Vite
 - **Backend**: Node.js (Express.js)
 - **Database**: MySQL (AWS Aurora Multi-AZ)
 - **Web Server**: Nginx
@@ -71,7 +71,11 @@ CREATE TABLE grocery_list (
 - **Responsive UI**: A seamless and intuitive user experience built with React.js.
 - **Scalability**: Load balancing and auto-scaling at each layer.
 
-## Setup Instructions
+## Running the Application
+
+### Local Development
+
+To test and run the application locally:
 
 1. Clone the repository:
    ```sh
@@ -86,13 +90,25 @@ CREATE TABLE grocery_list (
    ```
 3. Configure environment variables in `.env` file for the backend.
 4. Start the backend and frontend servers:
+
    ```sh
+   # Start backend server
    cd ../../application-code/app-tier
-   npm start
+   node server.js
+
+   # Start frontend server
    cd ../../application-code/web-tier
-   npm start
+   npm run dev  # This is for local testing only
    ```
+
 5. The application should be running at `http://localhost:3000/`.
+
+### Deployment on AWS (Production)
+
+For deploying this application on AWS, follow this guide which is based on the **same architecture**:
+[Deploying a Three-Tier Web Application on AWS](https://www.youtube.com/watch?v=amiIcyt-J2A)
+
+The tutorial uses the repository: [AWS Three-Tier Web Architecture Workshop](https://github.com/aws-samples/aws-three-tier-web-architecture-workshop.git), but since our app follows the same **React.js + Node.js + MySQL** setup and folder structure, the deployment process should be the same.
 
 ## Contributing
 
