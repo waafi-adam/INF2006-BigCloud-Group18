@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem('token'));
@@ -95,63 +97,81 @@ const App = () => {
         await axios.delete(`http://localhost:5000/expenses/${id}`, { headers: { Authorization: token } });
         fetchExpenses(selectedCategory);
     };
+
     const calculateTotalExpenses = () => {
-      return expenses.reduce((total, expense) => total + (expense.price * expense.quantity), 0);
-  };
+        return expenses.reduce((total, expense) => total + (expense.price * expense.quantity), 0);
+    };
 
   const calculateCategoryTotal = (categoryId) => {
       return expenses
           .filter(expense => expense.category_id === categoryId)
           .reduce((total, expense) => total + (expense.price * expense.quantity), 0);
   };
+  const calculateItemTotal = (expense) => {
+    return (expense.price * expense.quantity).toFixed(2);
+  };
+
     return (
-        <div>
+        <Container maxWidth="md" style={{ marginTop: '20px', textAlign: 'center' }}>
             {!token ? (
-                <div>
-                    <h2>Login</h2>
-                    <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" />
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-                    <button onClick={handleLogin}>Login</button>
-                    <button onClick={handleRegister}>Register</button>
-                </div>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h4">Login</Typography>
+                        <TextField fullWidth label="Username" variant="outlined" margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} />
+                        <TextField fullWidth label="Password" type="password" variant="outlined" margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
+                        <Button variant="contained" color="primary" onClick={handleLogin} style={{ margin: '10px' }}>Login</Button>
+                        <Button variant="contained" color="secondary" onClick={handleRegister}>Register</Button>
+                    </CardContent>
+                </Card>
             ) : (
-                <div>
-                    <h1>Expense Management System</h1>
-                    {user && <h2>Welcome, {user.username}!</h2>}
-                    <h3>Total Expenses: ${calculateTotalExpenses().toFixed(2)}</h3>
-                    <button onClick={handleLogout}>Logout</button>
-                    <input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="New Category" />
-                    <button onClick={addCategory}>Create New Category</button>
-                    <h2>Categories</h2>
-                    {categories.map(category => (
-                        <div key={category.id}>
-                            <button onClick={() => fetchExpenses(category.id)}>{category.name}</button>
-                            <span> Total: ${calculateCategoryTotal(category.id).toFixed(2)}</span>
-                            <button onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>Update</button>
-                            <button onClick={() => deleteCategory(category.id)}>Delete</button>
-                        </div>
-                    ))}
+                <>
+                    <Typography variant="h3">Expense Management System</Typography>
+                    {user && <Typography variant="h5">Welcome, {user.username}!</Typography>}
+                    <Typography variant="h6">Total Expenses: ${calculateTotalExpenses().toFixed(2)}</Typography>
+                    <Button variant="contained" color="error" onClick={handleLogout} style={{ margin: '10px' }}>Logout</Button>
+                    <TextField label="New Category" variant="outlined" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
+                    <Button variant="contained" color="primary" onClick={addCategory} style={{ margin: '10px' }}>Create New Category</Button>
+                    <Typography variant="h4">Categories</Typography>
+                    <Grid container spacing={2}>
+                        {categories.map(category => (
+                            <Grid item xs={12} sm={6} key={category.id}>
+                                <Card>
+                                    <CardContent>
+                                        <Typography variant="h6">{category.name}</Typography>
+                                        <Typography variant="subtitle1">Total: ${calculateCategoryTotal(category.id).toFixed(2)}</Typography>
+                                        <Button variant="contained" onClick={() => fetchExpenses(category.id)}>View Expenses</Button>
+                                        <Button variant="contained" color="warning" onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>Update</Button>
+                                        <Button variant="contained" color="error" onClick={() => deleteCategory(category.id)}>Delete</Button>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
                     {selectedCategory && (
-                        <div>
-                            <h2>Expenses</h2>
-                            <ul>
+                        <>
+                            <Typography variant="h4">Expenses</Typography>
+                            <List>
                                 {expenses.map(expense => (
-                                    <li key={expense.id}>
-                                        {expense.item} - {expense.quantity} - ${expense.price} (Total: ${ (expense.price * expense.quantity).toFixed(2) })
-                                        <button onClick={() => updateExpense(expense.id, { item: prompt('New Item:', expense.item), quantity: prompt('New Quantity:', expense.quantity), price: prompt('New Price:', expense.price) })}>Update</button>
-                                        <button onClick={() => deleteExpense(expense.id)}>Delete</button>
-                                    </li>
+                                    <ListItem key={expense.id}>
+                                        <ListItemText primary={`${expense.item} - ${expense.quantity} - $${expense.price} (Total: $${calculateItemTotal(expense)})`} />
+                                        <IconButton color="warning" onClick={() => updateExpense(expense.id, { item: prompt('New Item:', expense.item), quantity: prompt('New Quantity:', expense.quantity), price: prompt('New Price:', expense.price) })}>
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton color="error" onClick={() => deleteExpense(expense.id)}>
+                                            <Delete />
+                                        </IconButton>
+                                    </ListItem>
                                 ))}
-                            </ul>
-                            <input value={newExpense.item} onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })} placeholder="Item Name" />
-                            <input value={newExpense.quantity} onChange={(e) => setNewExpense({ ...newExpense, quantity: e.target.value })} placeholder="Quantity" />
-                            <input value={newExpense.price} onChange={(e) => setNewExpense({ ...newExpense, price: e.target.value })} placeholder="Price" />
-                            <button onClick={addExpense}>Add Expense</button>
-                        </div>
+                            </List>
+                            <TextField label="Item" variant="outlined" value={newExpense.item} onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })} />
+                            <TextField label="Quantity" variant="outlined" value={newExpense.quantity} onChange={(e) => setNewExpense({ ...newExpense, quantity: e.target.value })} />
+                            <TextField label="Price" variant="outlined" value={newExpense.price} onChange={(e) => setNewExpense({ ...newExpense, price: e.target.value })} />
+                            <Button variant="contained" color="primary" onClick={addExpense}>Add Expense</Button>
+                        </>
                     )}
-                </div>
+                </>
             )}
-        </div>
+        </Container>
     );
 };
 
