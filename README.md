@@ -89,7 +89,9 @@ To test and run the application locally:
    npm install
    ```
 3. Configure environment variables in `.env` file for the backend.
-4. Start the backend and frontend servers:
+4. Create a local MySQL database by downloading MySQL Command Line Client from [MySQL official website](https://dev.mysql.com/downloads/mysql/).
+5. Use the MySQL client to create the database and tables as stated in the database schema section.
+6. Start the backend and frontend servers:
 
    ```sh
    # Start backend server
@@ -101,7 +103,7 @@ To test and run the application locally:
    npm run dev  # This is for local testing only
    ```
 
-5. The application should be running at `http://localhost:3000/`.
+7. The application should be running at `http://localhost:3000/`.
 
 ### Deployment on AWS (Production)
 
