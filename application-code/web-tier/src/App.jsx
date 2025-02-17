@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, Tabs, Tab, Box, MenuItem, Select, IconButton } from '@mui/material';
 import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
@@ -169,41 +168,82 @@ const App = () => {
                             </Tabs>
                             <Box mt={2}>
                                 {selectedCategory && (
-                                  <>
-                                        <Button variant="contained" color="warning" onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>Edit Category</Button>
-                                        <Button variant="contained" color="error" onClick={() => deleteCategory(category.id)}>Delete Category</Button>
-                                        <TableContainer component={Paper}>
-                                            <Table>
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>Item</TableCell>
-                                                        <TableCell>Quantity</TableCell>
-                                                        <TableCell>Price</TableCell>
-                                                        <TableCell>Actions</TableCell>
+                                    <Card>
+                                        <CardContent>
+                                            <Typography variant="h6">
+                                                Managing Category: {categories.find(cat => cat.id === selectedCategory)?.name}
+                                            </Typography>
+                                            <Button
+                                                variant="contained"
+                                                color="warning"
+                                                onClick={() => {
+                                                    const newName = prompt('Enter new category name:');
+                                                    if (newName) updateCategory(selectedCategory, newName);
+                                                }}
+                                                style={{ margin: '5px' }}
+                                            >
+                                                Edit Category
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                onClick={() => deleteCategory(selectedCategory)}
+                                                style={{ margin: '5px' }}
+                                            >
+                                                Delete Category
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                )}
+
+                                {selectedCategory && (
+                                    <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                                        <Typography variant="h6">
+                                            Expenses For Category: {categories.find(cat => cat.id === selectedCategory)?.name}
+                                        </Typography>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Item</TableCell>
+                                                    <TableCell>Quantity</TableCell>
+                                                    <TableCell>Price</TableCell>
+                                                    <TableCell>Actions</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {expenses.map(expense => (
+                                                    <TableRow key={expense.id}>
+                                                        <TableCell>{expense.item}</TableCell>
+                                                        <TableCell>{expense.quantity}</TableCell>
+                                                        <TableCell>${expense.price}</TableCell>
+                                                        <TableCell>
+                                                            <IconButton
+                                                                color="warning"
+                                                                onClick={() => {
+                                                                    const updatedExpense = {
+                                                                        item: prompt('New Item:', expense.item),
+                                                                        quantity: prompt('New Quantity:', expense.quantity),
+                                                                        price: prompt('New Price:', expense.price),
+                                                                    };
+                                                                    if (updatedExpense.item && updatedExpense.quantity && updatedExpense.price) {
+                                                                        updateExpense(expense.id, updatedExpense);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Edit />
+                                                            </IconButton>
+                                                            <IconButton color="error" onClick={() => deleteExpense(expense.id)}>
+                                                                <Delete />
+                                                            </IconButton>
+                                                        </TableCell>
                                                     </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {expenses.map(expense => (
-                                                        <TableRow key={expense.id}>
-                                                            <TableCell>{expense.item}</TableCell>
-                                                            <TableCell>{expense.quantity}</TableCell>
-                                                            <TableCell>${expense.price}</TableCell>
-                                                            <TableCell>
-                                                                <IconButton color="warning">
-                                                                    <Edit />
-                                                                </IconButton>
-                                                                <IconButton color="error">
-                                                                    <Delete />
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                    </>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
                                 )}
                             </Box>
+
                         </CardContent>
                     </Card>
                 </>
