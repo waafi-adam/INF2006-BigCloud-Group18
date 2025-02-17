@@ -1,16 +1,16 @@
-# Grocery App
+# Expense Management System
 
 ## Overview
 
-This is a full-stack grocery application built using **React.js** for the frontend and **Node.js** for the backend. The application follows a three-tier architecture to ensure scalability, availability, and security.
+This is a full-stack **Expense Management System** built using **React.js** for the frontend and **Node.js with Express.js** for the backend. The application follows a three-tier architecture to ensure scalability, availability, and security.
 
 ## Architecture Overview
 
-![Architecture Diagram](https://github.com/aws-samples/aws-three-tier-web-architecture-workshop/blob/main/application-code/web-tier/src/assets/3TierArch.png)
+The system is designed using a three-tier architecture, where:
 
-In this architecture, a public-facing **Application Load Balancer** forwards client traffic to our **web tier** EC2 instances. The web tier runs **Nginx web servers** that serve the React.js frontend and redirect API calls to the **application tier's** internal-facing load balancer. This internal load balancer then forwards traffic to the application tier, which is built with **Node.js**.
-
-The **application tier** processes requests and manipulates data in an **Aurora MySQL multi-AZ database**. It then returns the requested data to the web tier. Load balancing, health checks, and auto-scaling groups are implemented at each layer to ensure high availability.
+- The **Web Tier** serves the React frontend.
+- The **Application Tier** handles the backend logic with Node.js and Express.js.
+- The **Database Tier** stores user and expense data using MySQL.
 
 ## File Structure
 
@@ -18,7 +18,7 @@ The **application tier** processes requests and manipulates data in an **Aurora 
 
 #### File: `/application-code/app-tier/server.js`
 
-This file contains the backend logic using **Node.js, Express.js, MySQL, and JWT Authentication**.
+Contains the backend logic using **Node.js, Express.js, MySQL, and JWT Authentication**.
 
 #### File: `/application-code/app-tier/.env`
 
@@ -28,47 +28,55 @@ Stores environment variables for database credentials and JWT secrets.
 
 #### File: `/application-code/web-tier/src/App.jsx`
 
-This file contains the **React.js** frontend logic for user authentication, grocery list management, and interaction with the backend API.
+Contains the **React.js** frontend logic for user authentication, expense management, and interaction with the backend API.
 
 ## Database Schema
 
-The application uses a **MySQL relational database** to store user and grocery list information. Below is the database schema:
+The application uses a **MySQL relational database** to store user, category, and expense information. Below is the updated database schema:
 
 ```sql
-CREATE DATABASE grocery_app;
-USE grocery_app;
+CREATE DATABASE expense_manager;
+USE expense_manager;
 
 CREATE TABLE users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE grocery_list (
-    item_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    item_name VARCHAR(100) NOT NULL,
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE expenses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL,
+    user_id INT NOT NULL,
+    item VARCHAR(255) NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 ```
 
 ## Technologies Used
 
-- **Frontend**: React.js, Vite
+- **Frontend**: React.js (Vite), Material UI
 - **Backend**: Node.js (Express.js)
-- **Database**: MySQL (AWS Aurora Multi-AZ)
+- **Database**: MySQL
 - **Web Server**: Nginx
-- **Load Balancing**: AWS ALB
 - **Hosting**: AWS EC2
 
 ## Features
 
 - **User Authentication**: Secure login and registration with password hashing.
-- **Grocery List Management**: Users can create, update, and delete grocery list items.
-- **Responsive UI**: A seamless and intuitive user experience built with React.js.
+- **Category & Expense Management**: Users can create, update, and delete categories and expenses.
+- **Tabbed UI for Categories**: Categories are displayed as tabs for easy navigation.
+- **Total Expense Calculation**: Displays total expenses for each category and overall expenses.
 - **Scalability**: Load balancing and auto-scaling at each layer.
 
 ## Running the Application
@@ -79,7 +87,7 @@ To test and run the application locally:
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/waafi-adam/INF2006-BigCloud-Group18.git
+   git clone https://github.com/waafi-adam/Expense-Management-System.git
    ```
 2. Install dependencies for both frontend and backend:
    ```sh
@@ -89,9 +97,8 @@ To test and run the application locally:
    npm install
    ```
 3. Configure environment variables in `.env` file for the backend.
-4. Create a local MySQL database by downloading MySQL Command Line Client from [MySQL official website](https://dev.mysql.com/downloads/mysql/).
-5. Use the MySQL client to create the database and tables as stated in the database schema section.
-6. Start the backend and frontend servers:
+4. Create a local MySQL database using the schema provided.
+5. Start the backend and frontend servers:
 
    ```sh
    # Start backend server
@@ -100,17 +107,15 @@ To test and run the application locally:
 
    # Start frontend server
    cd ../../application-code/web-tier
-   npm run dev  # This is for local testing only
+   npm run dev
    ```
 
-7. The application should be running at `http://localhost:3000/`.
+6. The application should be running at `http://localhost:3000/`.
 
-### Deployment on AWS (Production)
+## Deployment on AWS (Production)
 
-For deploying this application on AWS, follow this guide which is based on the **same architecture**:
+For deploying this application on AWS, follow this guide based on the **React.js + Node.js + MySQL** architecture:
 [Deploying a Three-Tier Web Application on AWS](https://www.youtube.com/watch?v=amiIcyt-J2A)
-
-The tutorial uses the repository: [AWS Three-Tier Web Architecture Workshop](https://github.com/aws-samples/aws-three-tier-web-architecture-workshop.git), but since our app follows the same **React.js + Node.js + MySQL** setup and folder structure, the deployment process should be the same.
 
 ## Contributing
 
