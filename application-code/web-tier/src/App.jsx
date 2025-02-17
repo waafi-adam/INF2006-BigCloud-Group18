@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, IconButton } from '@mui/material';
+// import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, Tabs, Tab, Box, MenuItem, Select, IconButton } from '@mui/material';
+import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const App = () => {
@@ -12,7 +13,8 @@ const App = () => {
     const [expenses, setExpenses] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [newCategory, setNewCategory] = useState('');
-    const [newExpense, setNewExpense] = useState({ item: '', quantity: '', price: '' });
+    const [newExpense, setNewExpense] = useState({ category_id: '', item: '', quantity: '', price: '' });
+    const [tabIndex, setTabIndex] = useState(0);
 
     useEffect(() => {
         if (token) {
@@ -83,9 +85,9 @@ const App = () => {
     };
 
     const addExpense = async () => {
-        await axios.post('http://localhost:5000/expenses', { category_id: selectedCategory, ...newExpense }, { headers: { Authorization: token } });
-        setNewExpense({ item: '', quantity: '', price: '' });
-        fetchExpenses(selectedCategory);
+        await axios.post('http://localhost:5000/expenses', newExpense, { headers: { Authorization: token } });
+        setNewExpense({ category_id: '', item: '', quantity: '', price: '' });
+        fetchExpenses(newExpense.category_id);
     };
 
     const updateExpense = async (id, updatedExpense) => {
@@ -127,52 +129,83 @@ const App = () => {
                 <>
                     <Typography variant="h3">Expense Management System</Typography>
                     {user && <Typography variant="h5">Welcome, {user.username}!</Typography>}
-                    <Typography variant="h6">Total Expenses: ${calculateTotalExpenses().toFixed(2)}</Typography>
-                    <Button variant="contained" color="error" onClick={handleLogout} style={{ margin: '10px' }}>Logout</Button>
-                    <TextField label="New Category" variant="outlined" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
-                    <Button variant="contained" color="primary" onClick={addCategory} style={{ margin: '10px' }}>Create New Category</Button>
-                    <Typography variant="h4">Categories</Typography>
+                    <Button variant="contained" color="error"  onClick={handleLogout} style={{ margin: '10px' }}>Logout</Button>
+                    
                     <Grid container spacing={2}>
-                        {categories.map(category => (
-                            <Grid item xs={12} sm={6} key={category.id}>
-                                <Card>
-                                    <CardContent>
-                                        <Typography variant="h6">{category.name}</Typography>
-                                        <Typography variant="subtitle1">Total: ${calculateCategoryTotal(category.id).toFixed(2)}</Typography>
-                                        <Button variant="contained" onClick={() => fetchExpenses(category.id)}>View Expenses</Button>
-                                        <IconButton color="warning"  onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>
-                                            <Edit />
-                                        </IconButton>
-                                        <IconButton color="error" onClick={() => deleteCategory(category.id)}>
-                                            <Delete />
-                                        </IconButton>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
+                        <Grid item xs={12} sm={6}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Create New Category</Typography>
+                                    <TextField fullWidth label="New Category" variant="outlined" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
+                                    <Button variant="contained" color="primary" onClick={addCategory} style={{ margin: '10px' }}>Create</Button>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Add Expense</Typography>
+                                    <TextField fullWidth label="Item" variant="outlined" value={newExpense.item} onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })} />
+                                    <TextField fullWidth label="Quantity" variant="outlined" value={newExpense.quantity} onChange={(e) => setNewExpense({ ...newExpense, quantity: e.target.value })} />
+                                    <TextField fullWidth label="Price" variant="outlined" value={newExpense.price} onChange={(e) => setNewExpense({ ...newExpense, price: e.target.value })} />
+                                    <Select fullWidth value={newExpense.category_id} onChange={(e) => setNewExpense({ ...newExpense, category_id: e.target.value })} displayEmpty>
+                                        <MenuItem value="" disabled>Select Category</MenuItem>
+                                        {categories.map(category => (
+                                            <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                    <Button variant="contained" color="primary" onClick={addExpense} style={{ margin: '10px' }}>Add Expense</Button>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     </Grid>
-                    {selectedCategory && (
-                        <>
-                            <Typography variant="h4">Expenses</Typography>
-                            <List>
-                                {expenses.map(expense => (
-                                    <ListItem key={expense.id}>
-                                        <ListItemText primary={`${expense.item} - ${expense.quantity} - $${expense.price} (Total: $${calculateItemTotal(expense)})`} />
-                                        <IconButton color="warning" onClick={() => updateExpense(expense.id, { item: prompt('New Item:', expense.item), quantity: prompt('New Quantity:', expense.quantity), price: prompt('New Price:', expense.price) })}>
-                                            <Edit />
-                                        </IconButton>
-                                        <IconButton color="error" onClick={() => deleteExpense(expense.id)}>
-                                            <Delete />
-                                        </IconButton>
-                                    </ListItem>
+                    
+                    <Card style={{ marginTop: '20px' }}>
+                        <CardContent>
+                            <Tabs value={tabIndex} onChange={(e, newValue) => setTabIndex(newValue)} aria-label="category-tabs">
+                                {categories.map((category, index) => (
+                                    <Tab key={category.id} label={category.name} onClick={() => fetchExpenses(category.id)} />
                                 ))}
-                            </List>
-                            <TextField label="Item" variant="outlined" value={newExpense.item} onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })} />
-                            <TextField label="Quantity" variant="outlined" value={newExpense.quantity} onChange={(e) => setNewExpense({ ...newExpense, quantity: e.target.value })} />
-                            <TextField label="Price" variant="outlined" value={newExpense.price} onChange={(e) => setNewExpense({ ...newExpense, price: e.target.value })} />
-                            <Button variant="contained" color="primary" onClick={addExpense}>Add Expense</Button>
-                        </>
-                    )}
+                            </Tabs>
+                            <Box mt={2}>
+                                {selectedCategory && (
+                                  <>
+                                        <Button variant="contained" color="warning" onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>Edit Category</Button>
+                                        <Button variant="contained" color="error" onClick={() => deleteCategory(category.id)}>Delete Category</Button>
+                                        <TableContainer component={Paper}>
+                                            <Table>
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Item</TableCell>
+                                                        <TableCell>Quantity</TableCell>
+                                                        <TableCell>Price</TableCell>
+                                                        <TableCell>Actions</TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {expenses.map(expense => (
+                                                        <TableRow key={expense.id}>
+                                                            <TableCell>{expense.item}</TableCell>
+                                                            <TableCell>{expense.quantity}</TableCell>
+                                                            <TableCell>${expense.price}</TableCell>
+                                                            <TableCell>
+                                                                <IconButton color="warning">
+                                                                    <Edit />
+                                                                </IconButton>
+                                                                <IconButton color="error">
+                                                                    <Delete />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    </>
+                                )}
+                            </Box>
+                        </CardContent>
+                    </Card>
                 </>
             )}
         </Container>
