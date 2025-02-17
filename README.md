@@ -6,6 +6,8 @@ This is a full-stack **Expense Management System** built using **React.js** for 
 
 ## Architecture Overview
 
+![Architecture Diagram](https://github.com/aws-samples/aws-three-tier-web-architecture-workshop/blob/main/application-code/web-tier/src/assets/3TierArch.png)
+
 The system is designed using a three-tier architecture, where:
 
 - The **Web Tier** serves the React frontend.
@@ -32,7 +34,9 @@ Contains the **React.js** frontend logic for user authentication, expense manage
 
 ## Database Schema
 
-The application uses a **MySQL relational database** to store user, category, and expense information. Below is the updated database schema:
+The application uses a **MySQL relational database** to store user, category, and expense information. Below is the database schema:
+
+To set up the database, install MySQL from [MySQL official website](https://dev.mysql.com/downloads/mysql/), then log in as root using the MySQL CLI and execute the following:
 
 ```sql
 CREATE DATABASE expense_manager;
@@ -65,7 +69,7 @@ CREATE TABLE expenses (
 
 ## Technologies Used
 
-- **Frontend**: React.js (Vite), Material UI
+- **Frontend**: React.js, Vite, Material UI
 - **Backend**: Node.js (Express.js)
 - **Database**: MySQL
 - **Web Server**: Nginx
@@ -97,7 +101,7 @@ To test and run the application locally:
    npm install
    ```
 3. Configure environment variables in `.env` file for the backend.
-4. Create a local MySQL database using the schema provided.
+4. Install MySQL and log in as root, then execute the provided database schema.
 5. Start the backend and frontend servers:
 
    ```sh
@@ -110,7 +114,7 @@ To test and run the application locally:
    npm run dev
    ```
 
-6. The application should be running at `http://localhost:3000/`.
+6. The application should be running at `http://localhost:5173/`.
 
 ## Deployment on AWS (Production)
 
