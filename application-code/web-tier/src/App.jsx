@@ -140,8 +140,12 @@ const App = () => {
                                         <Typography variant="h6">{category.name}</Typography>
                                         <Typography variant="subtitle1">Total: ${calculateCategoryTotal(category.id).toFixed(2)}</Typography>
                                         <Button variant="contained" onClick={() => fetchExpenses(category.id)}>View Expenses</Button>
-                                        <Button variant="contained" color="warning" onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>Update</Button>
-                                        <Button variant="contained" color="error" onClick={() => deleteCategory(category.id)}>Delete</Button>
+                                        <IconButton color="warning"  onClick={() => updateCategory(category.id, prompt('Enter new name:', category.name))}>
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton color="error" onClick={() => deleteCategory(category.id)}>
+                                            <Delete />
+                                        </IconButton>
                                     </CardContent>
                                 </Card>
                             </Grid>
