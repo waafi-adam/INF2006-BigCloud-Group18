@@ -65,6 +65,14 @@ CREATE TABLE expenses (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE report_settings (
+    user_id INT PRIMARY KEY,
+    enabled BOOLEAN DEFAULT FALSE,
+    frequency ENUM('daily', 'weekly', 'monthly') DEFAULT 'weekly',
+    email VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 ```
 
 ## Technologies Used
