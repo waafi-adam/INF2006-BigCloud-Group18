@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel,useMediaQuery, useTheme, Alert, CircularProgress } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
+import AdminView from './adminView';
 
 const App = () => {
     const theme = useTheme();
@@ -24,6 +25,7 @@ const App = () => {
     const [expenseReportEnabled, setExpenseReportEnabled] = useState(false);
     const [reportFrequency, setReportFrequency] = useState("weekly");
     const [reportEmail, setReportEmail] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
   
 
     useEffect(() => {
@@ -38,6 +40,7 @@ const App = () => {
         try {
             const response = await axios.get('http://localhost:5000/user', { headers: { Authorization: token } });
             setUser(response.data);
+            setIsAdmin(response.data.role === 'admin'); 
         } catch (error) {
             console.error('Failed to fetch user', error);
         }
@@ -241,6 +244,9 @@ const App = () => {
           </Button>
         </CardContent>
       </Card>
+            ) : isAdmin ? (
+                // Admin View
+                <AdminView token={token} handleLogout={handleLogout} />
             ) : (
                 <>
                     <Typography variant="h3">Expense Management System</Typography>

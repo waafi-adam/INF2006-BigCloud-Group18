@@ -93,7 +93,7 @@ const authenticate = (req, res, next) => {
 
 // Fetch logged-in user details
 app.get('/user', authenticate, (req, res) => {
-    db.query('SELECT id, username FROM users WHERE id = ?', [req.userId], (err, result) => {
+    db.query('SELECT id, username, role FROM users WHERE id = ?', [req.userId], (err, result) => {
         if (err) return res.status(500).json(err);
         if (result.length === 0) return res.status(404).json({ message: 'User not found' });
         res.json(result[0]);
@@ -201,6 +201,26 @@ app.get('/report-settings', authenticate, (req, res) => {
         }
     );
 });
+
+// admin view
+app.get('/all-expenses', authenticate, async (req, res) => {
+    try {
+        const [user] = await db.promise().query('SELECT role FROM users WHERE id = ?', [req.userId]);
+        if (user[0].role !== 'admin') {
+            return res.status(403).json({ message: "Access denied. Admins only." });
+        }
+        const [expenses] = await db.promise().query(`
+            SELECT expenses.*, users.username, categories.name as category_name
+            FROM expenses
+            JOIN users ON expenses.user_id = users.id
+            JOIN categories ON expenses.category_id = categories.id
+        `);
+        res.json(expenses);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch expenses' });
+    }
+});
+
 
 
 const PORT = 5000;
