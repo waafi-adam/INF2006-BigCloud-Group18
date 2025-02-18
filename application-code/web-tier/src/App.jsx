@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel, } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const App = () => {
@@ -14,11 +14,15 @@ const App = () => {
     const [newCategory, setNewCategory] = useState('');
     const [newExpense, setNewExpense] = useState({ category_id: '', item: '', quantity: '', price: '' });
     const [tabIndex, setTabIndex] = useState(0);
+    const [expenseReportEnabled, setExpenseReportEnabled] = useState(false);
+    const [reportFrequency, setReportFrequency] = useState("weekly");
+    const [reportEmail, setReportEmail] = useState("");
 
     useEffect(() => {
         if (token) {
             fetchUser();
             fetchCategories();
+            fetchReportSettings();
         }
     }, [token]);
 
@@ -112,6 +116,48 @@ const App = () => {
     return (expense.price * expense.quantity).toFixed(2);
   };
 
+
+  const fetchReportSettings = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/report-settings", {
+        headers: { Authorization: token },
+      });
+
+      if (response.data) {
+        setExpenseReportEnabled(response.data.enabled);
+        setReportFrequency(response.data.frequency);
+        setReportEmail(response.data.email);
+      }
+    } catch (error) {
+      console.error("Failed to fetch report settings", error);
+    }
+  };
+
+  const handleReportToggle = async () => {
+    const newStatus = !expenseReportEnabled;
+    setExpenseReportEnabled(newStatus);
+
+    if (!newStatus) {
+      setReportEmail("");
+      setReportFrequency("weekly");
+    }
+
+    await saveReportSettings(newStatus, reportFrequency, reportEmail);
+  };
+
+  const saveReportSettings = async (enabled, frequency, email) => {
+    try {
+      await axios.post(
+        "http://localhost:5000/report-settings",
+        { enabled, frequency, email },
+        { headers: { Authorization: token } }
+      );
+    } catch (error) {
+      console.error("Failed to save report settings", error);
+    }
+  };
+
+
     return (
         <Container maxWidth="md" style={{ marginTop: '20px', textAlign: 'center' }}>
             {!token ? (
@@ -131,33 +177,103 @@ const App = () => {
                     <Button variant="contained" color="error"  onClick={handleLogout} style={{ margin: '10px' }}>Logout</Button>
                     
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="h6">Create New Category</Typography>
-                                    <TextField fullWidth label="New Category" variant="outlined" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
-                                    <Button variant="contained" color="primary" onClick={addCategory} style={{ margin: '10px' }}>Create</Button>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="h6">Add Expense</Typography>
-                                    <TextField fullWidth label="Item" variant="outlined" value={newExpense.item} onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })} />
-                                    <TextField fullWidth label="Quantity" variant="outlined" value={newExpense.quantity} onChange={(e) => setNewExpense({ ...newExpense, quantity: e.target.value })} />
-                                    <TextField fullWidth label="Price" variant="outlined" value={newExpense.price} onChange={(e) => setNewExpense({ ...newExpense, price: e.target.value })} />
-                                    <Select fullWidth value={newExpense.category_id} onChange={(e) => setNewExpense({ ...newExpense, category_id: e.target.value })} displayEmpty>
-                                        <MenuItem value="" disabled>Select Category</MenuItem>
-                                        {categories.map(category => (
-                                            <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
-                                        ))}
-                                    </Select>
-                                    <Button variant="contained" color="primary" onClick={addExpense} style={{ margin: '10px' }}>Add Expense</Button>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    </Grid>
+            {/* Left Column: Expense Report + Add Category */}
+            <Grid item xs={12} sm={6}>
+
+              {/* Expense Report Card */}
+              <Card style={{ marginBottom: "10px" }}>
+                <CardContent>
+                  <Typography variant="h6">Expense Report Settings</Typography>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Switch checked={expenseReportEnabled} onChange={handleReportToggle} />
+                      }
+                      label="Enable Expense Reports"
+                    />
+                  </FormGroup>
+
+                  {expenseReportEnabled && (
+                    <>
+                      <FormControl fullWidth style={{ marginTop: "10px" }}>
+                        <InputLabel>Report Frequency</InputLabel>
+                        <Select
+                          value={reportFrequency}
+                          onChange={(e) => {
+                            setReportFrequency(e.target.value);
+                            saveReportSettings(expenseReportEnabled, e.target.value, reportEmail);
+                          }}
+                        >
+                          <MenuItem value="daily">Daily</MenuItem>
+                          <MenuItem value="weekly">Weekly</MenuItem>
+                          <MenuItem value="monthly">Monthly</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <TextField
+                        fullWidth
+                        label="Email Address"
+                        variant="outlined"
+                        margin="normal"
+                        value={reportEmail}
+                        onChange={(e) => {
+                          setReportEmail(e.target.value);
+                          saveReportSettings(expenseReportEnabled, reportFrequency, e.target.value);
+                        }}
+                      />
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Add Category Card */}
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Create New Category</Typography>
+                  <TextField
+                    fullWidth
+                    label="New Category"
+                    variant="outlined"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={addCategory}
+                    style={{ margin: "10px" }}
+                  >
+                    Create
+                  </Button>
+                </CardContent>
+              </Card>
+
+            </Grid>
+
+            {/* Right Column: Add Expense */}
+            <Grid item xs={12} sm={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Add Expense</Typography>
+                  <TextField fullWidth label="Item" variant="outlined" />
+                  <TextField fullWidth label="Quantity" variant="outlined" />
+                  <TextField fullWidth label="Price" variant="outlined" />
+                  <FormControl fullWidth>
+                    <InputLabel>Select Category</InputLabel>
+                    <Select>
+                      <MenuItem value="" disabled>
+                        Select Category
+                      </MenuItem>
+                      {/* Category Options Here */}
+                    </Select>
+                  </FormControl>
+                  <Button variant="contained" color="primary" style={{ margin: "10px" }}>
+                    Add Expense
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
                     
                     <Card style={{ marginTop: '20px' }}>
                         <CardContent>

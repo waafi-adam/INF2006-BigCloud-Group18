@@ -148,6 +148,36 @@ app.delete('/expenses/:id', authenticate, (req, res) => {
     });
 });
 
+// Report Settings - Save user preferences
+app.post('/report-settings', authenticate, (req, res) => {
+    const { enabled, frequency, email } = req.body;
+
+    db.query(
+        `INSERT INTO report_settings (user_id, enabled, frequency, email) 
+         VALUES (?, ?, ?, ?) 
+         ON DUPLICATE KEY UPDATE enabled = ?, frequency = ?, email = ?`,
+        [req.userId, enabled, frequency, email, enabled, frequency, email],
+        (err, result) => {
+            if (err) return res.status(500).json(err);
+            res.json({ message: "Report settings updated successfully" });
+        }
+    );
+});
+
+// Report Settings - Fetch user preferences
+app.get('/report-settings', authenticate, (req, res) => {
+    db.query(
+        'SELECT enabled, frequency, email FROM report_settings WHERE user_id = ?',
+        [req.userId],
+        (err, results) => {
+            if (err) return res.status(500).json(err);
+            if (results.length === 0) return res.json({ enabled: false, frequency: "weekly", email: "" });
+            res.json(results[0]);
+        }
+    );
+});
+
+
 const PORT = 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
