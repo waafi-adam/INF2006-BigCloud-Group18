@@ -99,7 +99,7 @@ To test and run the application locally:
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/waafi-adam/Expense-Management-System.git
+   git clone https://github.com/waafi-adam/INF2006-BigCloud-Group18.git
    ```
 2. Install dependencies for both frontend and backend:
    ```sh
