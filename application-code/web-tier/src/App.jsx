@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel,useMediaQuery, useTheme, Alert, CircularProgress } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
+
+const API_BASE_URL = "http://web-tier-alb-147766408.us-east-1.elb.amazonaws.com/api";
+
 import AdminView from './adminView';
-const API_BASE_URL = "http://54.84.115.252/api";
 
 
 const App = () => {
