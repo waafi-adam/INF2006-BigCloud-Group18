@@ -27,27 +27,52 @@ db.connect(err => {
     console.log('Connected to MySQL database');
 });
 
-// User Registration
+// User Registration with Validation
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: 'User registered successfully' });
-    });
+
+    // Basic validation
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+    if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
+    try {
+        // Check if username exists
+        db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+            if (err) return res.status(500).json({ message: "Database error." });
+            if (results.length > 0) return res.status(400).json({ message: "Username already taken." });
+
+            // Hash password and insert user
+            const hashedPassword = await bcrypt.hash(password, 10);
+            db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
+                if (err) return res.status(500).json({ message: "Database error." });
+                res.json({ message: 'User registered successfully' });
+            });
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server error." });
+    }
 });
 
-// User Login
+// User Login with Validation
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required." });
+    }
+
     db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
-        if (err) return res.status(500).json(err);
-        if (results.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
-        
+        if (err) return res.status(500).json({ message: "Database error." });
+        if (results.length === 0) return res.status(401).json({ message: "Invalid username or password." });
+
         const user = results[0];
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(401).json({ message: 'Invalid credentials' });
-        
+        if (!isPasswordValid) return res.status(401).json({ message: "Invalid username or password." });
+
         const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
         res.json({ token });
     });

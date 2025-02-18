@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel,useMediaQuery, useTheme } from '@mui/material';
+import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel,useMediaQuery, useTheme, Alert, CircularProgress } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const App = () => {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem("token"));
+    const [user, setUser] = useState(null); 
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [loginError, setLoginError] = useState(null);
+    const [registerError, setRegisterError] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState(null);  
     const [categories, setCategories] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -40,23 +44,36 @@ const App = () => {
     };
 
     const handleLogin = async () => {
+        setLoading(true);
+        setLoginError(null);
+        setSuccessMessage(null);
+
         try {
-            const response = await axios.post('http://localhost:5000/login', { username, password });
-            localStorage.setItem('token', response.data.token);
+            const response = await axios.post("http://localhost:5000/login", { username, password });
+            localStorage.setItem("token", response.data.token);
             setToken(response.data.token);
         } catch (error) {
-            console.error('Login failed', error);
+            setLoginError(error.response?.data?.message || "Login failed.");
         }
+
+        setLoading(false);
     };
 
     const handleRegister = async () => {
+        setLoading(true);
+        setRegisterError(null);
+        setSuccessMessage(null);
+
         try {
-            await axios.post('http://localhost:5000/register', { username, password });
-            alert('User registered successfully');
+            await axios.post("http://localhost:5000/register", { username, password });
+            setSuccessMessage("User registered successfully. You can now log in.");
         } catch (error) {
-            console.error('Registration failed', error);
+            setRegisterError(error.response?.data?.message || "Registration failed.");
         }
+
+        setLoading(false);
     };
+    
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -165,15 +182,65 @@ const App = () => {
     return (
         <Container maxWidth="md" style={{ marginTop: '20px', textAlign: 'center' }}>
             {!token ? (
-                <Card>
-                    <CardContent>
-                        <Typography variant="h4">Login</Typography>
-                        <TextField fullWidth label="Username" variant="outlined" margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} />
-                        <TextField fullWidth label="Password" type="password" variant="outlined" margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <Button variant="contained" color="primary" onClick={handleLogin} style={{ margin: '10px' }}>Login</Button>
-                        <Button variant="contained" color="secondary" onClick={handleRegister}>Register</Button>
-                    </CardContent>
-                </Card>
+        <Card>
+        <CardContent>
+          <Typography variant="h4">Login</Typography>
+
+          {/* Display success message after registration */}
+          {successMessage && <Alert severity="success">{successMessage}</Alert>}
+
+          {/* Login Error Message */}
+          {loginError && <Alert severity="error">{loginError}</Alert>}
+
+          <TextField
+            fullWidth
+            label="Username"
+            variant="outlined"
+            margin="normal"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            error={!!loginError}
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            variant="outlined"
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={!!loginError}
+          />
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleLogin}
+            sx={{ marginTop: 2 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Login"}
+          </Button>
+
+          {/* Registration */}
+          <Typography variant="h6" sx={{ marginTop: 2 }}>
+            Don't have an account?
+          </Typography>
+
+          {/* Registration Error Message */}
+          {registerError && <Alert severity="error">{registerError}</Alert>}
+
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleRegister}
+            sx={{ marginTop: 1 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Register"}
+          </Button>
+        </CardContent>
+      </Card>
             ) : (
                 <>
                     <Typography variant="h3">Expense Management System</Typography>
