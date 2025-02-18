@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel, } from '@mui/material';
+import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel,useMediaQuery, useTheme } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const App = () => {
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -17,6 +20,7 @@ const App = () => {
     const [expenseReportEnabled, setExpenseReportEnabled] = useState(false);
     const [reportFrequency, setReportFrequency] = useState("weekly");
     const [reportEmail, setReportEmail] = useState("");
+  
 
     useEffect(() => {
         if (token) {
@@ -176,7 +180,7 @@ const App = () => {
                     {user && <Typography variant="h5">Welcome, {user.username}!</Typography>}
                     <Button variant="contained" color="error"  onClick={handleLogout} style={{ margin: '10px' }}>Logout</Button>
                     
-                    <Box sx={{ display: "flex", flexDirection: "row", gap: 2, marginTop: "20px" }}>
+                    <Box sx={{ display: "flex", flexDirection: isSmallScreen ? "column" : "row", gap: 2, marginTop: "20px" }}>
                         
                         {/* Left Column (Expense Report + Add Category) */}
                         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
