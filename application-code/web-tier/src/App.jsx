@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, TextField, Button, Typography, Card, CardContent, Grid, List, ListItem, ListItemText, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
+const API_BASE_URL = "http://54.84.115.252/api";
+
 
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem('token'));
@@ -24,7 +26,7 @@ const App = () => {
 
     const fetchUser = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/user', { headers: { Authorization: token } });
+            const response = await axios.get(`${API_BASE_URL}/user`, { headers: { Authorization: token } });
             setUser(response.data);
         } catch (error) {
             console.error('Failed to fetch user', error);
@@ -33,7 +35,7 @@ const App = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/login', { username, password });
+            const response = await axios.post(`${API_BASE_URL}/login`, { username, password });
             localStorage.setItem('token', response.data.token);
             setToken(response.data.token);
         } catch (error) {
@@ -43,7 +45,7 @@ const App = () => {
 
     const handleRegister = async () => {
         try {
-            await axios.post('http://localhost:5000/register', { username, password });
+            await axios.post(`${API_BASE_URL}/register`, { username, password });
             alert('User registered successfully');
         } catch (error) {
             console.error('Registration failed', error);
@@ -57,45 +59,45 @@ const App = () => {
     };
 
     const fetchCategories = async () => {
-        const response = await axios.get('http://localhost:5000/categories', { headers: { Authorization: token } });
+        const response = await axios.get(`${API_BASE_URL}/categories`, { headers: { Authorization: token } });
         setCategories(response.data);
     };
 
     const addCategory = async () => {
-        await axios.post('http://localhost:5000/categories', { name: newCategory }, { headers: { Authorization: token } });
+        await axios.post(`${API_BASE_URL}/categories`, { name: newCategory }, { headers: { Authorization: token } });
         setNewCategory('');
         fetchCategories();
     };
 
     const updateCategory = async (id, newName) => {
-        await axios.put(`http://localhost:5000/categories/${id}`, { name: newName }, { headers: { Authorization: token } });
+        await axios.put(`${API_BASE_URL}/categories/${id}`, { name: newName }, { headers: { Authorization: token } });
         fetchCategories();
     };
 
     const deleteCategory = async (id) => {
-        await axios.delete(`http://localhost:5000/categories/${id}`, { headers: { Authorization: token } });
+        await axios.delete(`${API_BASE_URL}/categories/${id}`, { headers: { Authorization: token } });
         fetchCategories();
     };
 
     const fetchExpenses = async (categoryId) => {
         setSelectedCategory(categoryId);
-        const response = await axios.get(`http://localhost:5000/expenses/${categoryId}`, { headers: { Authorization: token } });
+        const response = await axios.get(`${API_BASE_URL}/expenses/${categoryId}`, { headers: { Authorization: token } });
         setExpenses(response.data);
     };
 
     const addExpense = async () => {
-        await axios.post('http://localhost:5000/expenses', newExpense, { headers: { Authorization: token } });
+        await axios.post(`${API_BASE_URL}/expenses`, newExpense, { headers: { Authorization: token } });
         setNewExpense({ category_id: '', item: '', quantity: '', price: '' });
         fetchExpenses(newExpense.category_id);
     };
 
     const updateExpense = async (id, updatedExpense) => {
-        await axios.put(`http://localhost:5000/expenses/${id}`, updatedExpense, { headers: { Authorization: token } });
+        await axios.put(`${API_BASE_URL}/expenses/${id}`, updatedExpense, { headers: { Authorization: token } });
         fetchExpenses(selectedCategory);
     };
 
     const deleteExpense = async (id) => {
-        await axios.delete(`http://localhost:5000/expenses/${id}`, { headers: { Authorization: token } });
+        await axios.delete(`${API_BASE_URL}/expenses/${id}`, { headers: { Authorization: token } });
         fetchExpenses(selectedCategory);
     };
 
