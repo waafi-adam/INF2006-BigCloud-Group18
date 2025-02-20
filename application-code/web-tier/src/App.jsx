@@ -5,6 +5,7 @@ import { Edit, Delete } from '@mui/icons-material';
 
 const API_BASE_URL = "http://web-tier-alb-147766408.us-east-1.elb.amazonaws.com/api";
 
+
 import AdminView from './adminView';
 
 
@@ -147,7 +148,7 @@ const App = () => {
 
   const fetchReportSettings = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/report-settings", {
+      const response = await axios.get(`${API_BASE_URL}/report-settings`, {
         headers: { Authorization: token },
       });
 
@@ -176,7 +177,7 @@ const App = () => {
   const saveReportSettings = async (enabled, frequency, email) => {
     try {
       await axios.post(
-        "http://localhost:5000/report-settings",
+        `${API_BASE_URL}/report-settings`,
         { enabled, frequency, email },
         { headers: { Authorization: token } }
       );
