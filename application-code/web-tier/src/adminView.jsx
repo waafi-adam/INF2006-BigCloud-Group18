@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem } from '@mui/material';
 
+const API_BASE_URL = "http://web-tier-alb-147766408.us-east-1.elb.amazonaws.com/api";
+
 const AdminView = ({ token, handleLogout }) => {
     const [expenses, setExpenses] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -16,7 +18,7 @@ const AdminView = ({ token, handleLogout }) => {
 
     const checkAdmin = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/user', {
+            const response = await axios.get(`${API_BASE_URL}/user`, {
                 headers: { Authorization: token },
             });
             setIsAdmin(response.data.role === 'admin');
@@ -27,7 +29,7 @@ const AdminView = ({ token, handleLogout }) => {
 
     const fetchAllExpenses = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/all-expenses', {
+            const response = await axios.get(`${API_BASE_URL}/all-expenses`, {
                 headers: { Authorization: token },
             });
             setExpenses(response.data);
@@ -52,10 +54,6 @@ const AdminView = ({ token, handleLogout }) => {
     const calculateUserTotal = (userExpenses) => {
         return userExpenses.reduce((total, expense) => total + expense.price * expense.quantity, 0).toFixed(2);
     };
-
-    if (!isAdmin) {
-        return <Typography variant="h6" color="error">Access Denied: Admins Only</Typography>;
-    }
 
     const groupedExpenses = sortByUser ? groupExpensesByUser() : null;
 
