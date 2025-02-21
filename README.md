@@ -6,7 +6,7 @@ This is a full-stack **Expense Management System** built using **React.js** for 
 
 ## Architecture Overview
 
-![Architecture Diagram](https://github.com/aws-samples/aws-three-tier-web-architecture-workshop/blob/main/application-code/web-tier/src/assets/3TierArch.png)
+![Architecture Diagram](ArchitectureDiagram.png)
 
 The system is designed using a three-tier architecture, where:
 
