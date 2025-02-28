@@ -2,30 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem } from '@mui/material';
 
-const API_BASE_URL = "http://web-tier-alb-147766408.us-east-1.elb.amazonaws.com/api";
+const API_BASE_URL = "http://WebTier-LB-571646936.us-east-1.elb.amazonaws.com/api";
 
-const AdminView = ({ token, handleLogout }) => {
+const AdminView = ({ isAdmin, token, handleLogout }) => {
     const [expenses, setExpenses] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [sortByUser, setSortByUser] = useState(false); // State to toggle sorting by user
+    const [sortByUser, setSortByUser] = useState(false);
 
     useEffect(() => {
-        if (token) {
-            checkAdmin();
-            fetchAllExpenses();
+        if (!isAdmin) {
+            console.error('User is not an admin');
+            return;
         }
-    }, [token]);
 
-    const checkAdmin = async () => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/user`, {
-                headers: { Authorization: token },
-            });
-            setIsAdmin(response.data.role === 'admin');
-        } catch (error) {
-            console.error('Failed to verify admin role', error);
-        }
-    };
+        fetchAllExpenses();
+    }, [isAdmin]);
+
 
     const fetchAllExpenses = async () => {
         try {

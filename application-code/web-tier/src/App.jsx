@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Container, TextField, Button, Typography, Card, CardContent, Grid, Tabs, Tab, Box, MenuItem, Select, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, Switch, FormGroup, FormControlLabel,useMediaQuery, useTheme, Alert, CircularProgress } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
-const API_BASE_URL = "http://web-tier-alb-147766408.us-east-1.elb.amazonaws.com/api";
+const API_BASE_URL = "http://WebTier-LB-571646936.us-east-1.elb.amazonaws.com/api";
 
 
 import AdminView from './adminView';
@@ -251,7 +251,7 @@ const App = () => {
       </Card>
             ) : isAdmin ? (
                 // Admin View
-                <AdminView token={token} handleLogout={handleLogout} />
+                <AdminView isAdmin={isAdmin} token={token} handleLogout={handleLogout} />
             ) : (
                 <>
                     <Typography variant="h3">Expense Management System</Typography>
